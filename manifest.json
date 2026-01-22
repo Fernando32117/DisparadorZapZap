@@ -5,7 +5,8 @@
 	"permissions": ["tabs"],
 	"host_permissions": ["https://web.whatsapp.com/*"],
 	"action": {
-		"default_popup": "popup.html"
+		"default_popup": "popup.html",
+		"default_icon": "assets/raio.png"
 	},
 	"content_scripts": [
 		{
