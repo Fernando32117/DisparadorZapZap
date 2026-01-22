@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Disparador ZapZap</title>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<header>
+			<h1>💬Disparador ZapZap💬</h1>
+		</header>
+
+		<main>
+			<section class="interval-section">
+				<label>Números (Brasil)</label>
+				<textarea id="numbers" placeholder="Ex: 5511999999999"></textarea>
+				<small>Formato: 55 + DDD + Número (sem espaços).</small>
+			</section>
+
+			<section class="interval-section">
+				<h3>⏱️ Intervalo entre Mensagens</h3>
+				<div class="interval-group">
+					<div>
+						<label>Mínimo (segundos):</label>
+						<input type="number" id="minInterval" value="6" min="6" max="60" />
+					</div>
+					<div>
+						<label>Máximo (segundos):</label>
+						<input
+							type="number"
+							id="maxInterval"
+							value="12"
+							min="6"
+							max="120"
+						/>
+					</div>
+				</div>
+				<small
+					>Intervalo aleatório entre min e max para parecer mais natural</small
+				>
+			</section>
+
+			<section class="interval-section">
+				<p class="info">
+					<strong>Pelo menos 1 mensagem é obrigatória.</strong> Crie até 3
+					variações. Cada mensagem será enviada de forma aleatória para evitar
+					bloqueios.
+				</p>
+				<label>Mensagem 1 <span class="required">(obrigatória)</span></label>
+				<textarea class="msg" data-msg="1"></textarea>
+
+				<label>Mensagem 2 <span class="optional">(opcional)</span></label>
+				<textarea class="msg" data-msg="2"></textarea>
+
+				<label>Mensagem 3 <span class="optional">(opcional)</span></label>
+				<textarea class="msg" data-msg="3"></textarea>
+			</section>
+
+			<section
+				class="progress-section"
+				id="progressSection"
+				style="display: none"
+			>
+				<h3>📊 Progresso do Disparo</h3>
+				<div class="progress-bar">
+					<div class="progress-fill" id="progressFill"></div>
+				</div>
+				<div class="countdown-timer" id="countdownTimer" style="display: none">
+					⏳ Próxima mensagem em: <strong id="countdown">0</strong>s
+				</div>
+				<div class="progress-stats">
+					<div class="stat success">
+						<span class="stat-label">✅ Sucesso:</span>
+						<span class="stat-value" id="successCount">0</span>
+					</div>
+					<div class="stat failed">
+						<span class="stat-label">❌ Falhas:</span>
+						<span class="stat-value" id="failedCount">0</span>
+					</div>
+					<div class="stat total">
+						<span class="stat-label">📋 Total:</span>
+						<span class="stat-value" id="totalCount">0</span>
+					</div>
+				</div>
+			</section>
+
+			<section class="controls-section">
+				<div class="buttons">
+					<button id="start">🚀 Disparar</button>
+					<button id="pause" disabled>⏸️ Pausar</button>
+					<button id="stop" disabled>🛑 Parar</button>
+				</div>
+			</section>
+			<footer>
+				<div class="warning">
+					⚠️ <strong>Atenção:</strong> Use com responsabilidade. O uso excessivo
+					pode resultar em banimento do WhatsApp.
+				</div>
+			</footer>
+		</main>
+
+		<script src="popup.js"></script>
+	</body>
+</html>

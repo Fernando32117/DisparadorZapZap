@@ -1,0 +1,16 @@
+{
+	"manifest_version": 3,
+	"name": "Disparador ZapZap(Dev)",
+	"version": "0.1",
+	"permissions": ["tabs"],
+	"host_permissions": ["https://web.whatsapp.com/*"],
+	"action": {
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://web.whatsapp.com/*"],
+			"js": ["content.js"]
+		}
+	]
+}
