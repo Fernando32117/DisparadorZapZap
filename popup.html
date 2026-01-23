@@ -4,21 +4,28 @@
 		<meta charset="UTF-8" />
 		<title>Disparador ZapZap</title>
 		<link rel="stylesheet" href="styles.css" />
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+		/>
 	</head>
 	<body>
 		<header>
-			<h1>💬Disparador ZapZap💬</h1>
+			<h1>
+				<i class="fa-brands fa-whatsapp"></i> Disparador ZapZap
+				<i class="fa-brands fa-whatsapp"></i>
+			</h1>
 		</header>
 
 		<main>
 			<section class="interval-section">
-				<label>Números (Brasil)</label>
+				<label><i class="fa-solid fa-phone"></i> Números (Brasil)</label>
 				<textarea id="numbers" placeholder="Ex: 5511999999999"></textarea>
-				<small>Formato: 55 + DDD + Número (sem espaços).</small>
+				<small>Formato: 55+DDD+Número (sem espaços).</small>
 			</section>
 
 			<section class="interval-section">
-				<h3>⏱️ Intervalo entre Mensagens</h3>
+				<h3><i class="fa-solid fa-clock"></i> Intervalo entre Mensagens</h3>
 				<div class="interval-group">
 					<div>
 						<label>Mínimo (segundos):</label>
@@ -61,24 +68,31 @@
 				id="progressSection"
 				style="display: none"
 			>
-				<h3>📊 Progresso do Disparo</h3>
+				<h3><i class="fa-solid fa-chart-bar"></i> Progresso do Disparo</h3>
 				<div class="progress-bar">
 					<div class="progress-fill" id="progressFill"></div>
 				</div>
 				<div class="countdown-timer" id="countdownTimer" style="display: none">
-					⏳ Próxima mensagem em: <strong id="countdown">0</strong>s
+					<i class="fa-solid fa-hourglass-half"></i> Próxima mensagem em:
+					<strong id="countdown">0</strong>s
 				</div>
 				<div class="progress-stats">
 					<div class="stat success">
-						<span class="stat-label">✅ Sucesso:</span>
+						<span class="stat-label"
+							><i class="fa-solid fa-check"></i> Sucesso:</span
+						>
 						<span class="stat-value" id="successCount">0</span>
 					</div>
 					<div class="stat failed">
-						<span class="stat-label">❌ Falhas:</span>
+						<span class="stat-label"
+							><i class="fa-solid fa-xmark"></i> Falhas:</span
+						>
 						<span class="stat-value" id="failedCount">0</span>
 					</div>
 					<div class="stat total">
-						<span class="stat-label">📋 Total:</span>
+						<span class="stat-label"
+							><i class="fa-solid fa-clipboard"></i> Total:</span
+						>
 						<span class="stat-value" id="totalCount">0</span>
 					</div>
 				</div>
@@ -86,17 +100,61 @@
 
 			<section class="controls-section">
 				<div class="buttons">
-					<button id="start">🚀 Disparar</button>
-					<button id="pause" disabled>⏸️ Pausar</button>
-					<button id="stop" disabled>🛑 Parar</button>
+					<button id="start"><i class="fa-solid fa-play"></i> Disparar</button>
+					<button id="pause" disabled>
+						<i class="fa-solid fa-pause"></i> Pausar
+					</button>
+					<button id="stop" disabled>
+						<i class="fa-solid fa-stop"></i> Parar
+					</button>
 				</div>
 			</section>
 			<footer>
 				<div class="warning">
-					⚠️ <strong>Atenção:</strong> Use com responsabilidade. O uso excessivo
+					<i class="fa-solid fa-triangle-exclamation"></i>
+					<strong>Atenção:</strong> Use com responsabilidade. O uso excessivo
 					pode resultar em banimento do WhatsApp.
 				</div>
 			</footer>
+			<section class="developer-section">
+				<p class="developer-info">Desenvolvedor:</p>
+				<p class="developer-info">
+					<i class="fa-solid fa-globe"></i>
+					<a
+						class="dev-link"
+						href="https://portifolio-fernando-souza.onrender.com/"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Portfólio Fernando Souza"
+					>
+						<span>Fernando Souza</span>
+					</a>
+				</p>
+				<p class="developer-info">
+					<i class="fa-brands fa-github"></i>
+					<a
+						class="dev-link"
+						href="https://github.com/Fernando32117"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="GitHub Fernando Souza"
+					>
+						<span>GitHub</span>
+					</a>
+				</p>
+				<p class="developer-info">
+					<i class="fa-brands fa-linkedin"></i>
+					<a
+						class="dev-link"
+						href="https://www.linkedin.com/in/gerfernandosouza/"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="LinkedIn Fernando Souza"
+					>
+						<span>LinkedIn</span>
+					</a>
+				</p>
+			</section>
 		</main>
 
 		<script src="popup.js"></script>
