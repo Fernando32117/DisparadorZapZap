@@ -91,11 +91,34 @@ async function countdownTimer(seconds) {
 }
 
 document.getElementById("start").onclick = async () => {
-	const numbers = document
-		.getElementById("numbers")
-		.value.split("\n")
+	const rawNumbers = document.getElementById("numbers").value || "";
+
+	// Tentar capturar padrões como +5511999999999 ou 5511999999999
+	let extracted = rawNumbers.match(/\+?\d{8,15}/g) || [];
+
+	// Se não encontrou via regex, dividir por separadores comuns (vírgula, nova linha, ponto-e-vírgula)
+	if (!extracted.length) {
+		extracted = rawNumbers
+			.split(/[,\n\r;]+/)
+			.map((s) => s.trim())
+			.filter(Boolean);
+	}
+
+	// Normalizar para dígitos apenas e manter números plausíveis (ex: 55 + DDD + número)
+	let numbers = extracted
 		.map((n) => n.replace(/\D/g, ""))
 		.filter((n) => n.length >= 12);
+
+	// Remover duplicados
+	numbers = [...new Set(numbers)];
+
+	// Avisar sobre números inválidos (se houver)
+	const rawList = rawNumbers
+		.split(/[,\n\r;]+/)
+		.map((s) => s.trim())
+		.filter(Boolean);
+	const normalizedFromRaw = rawList.map((s) => s.replace(/\D/g, ""));
+	const invalids = normalizedFromRaw.filter((n) => n.length && n.length < 12);
 
 	const messages = [...document.querySelectorAll(".msg")]
 		.map((m) => m.value)
@@ -105,8 +128,17 @@ document.getElementById("start").onclick = async () => {
 	const maxInterval = Number(document.getElementById("maxInterval").value);
 
 	if (!numbers.length) {
-		alert("Preencha pelo menos um número");
+		alert(
+			"Preencha pelo menos um número válido (ex: 5511999999999 ou +5511999999999)",
+		);
 		return;
+	}
+
+	if (invalids.length) {
+		alert(
+			"Alguns números foram ignorados por estarem em formato inválido:\n" +
+				invalids.join(", "),
+		);
 	}
 
 	if (!messages.length) {
@@ -147,25 +179,46 @@ document.getElementById("start").onclick = async () => {
 
 		const message = messages[Math.floor(Math.random() * messages.length)];
 
-		try {
-			await chrome.tabs.update(tab.id, {
-				url: `https://web.whatsapp.com/send?phone=${number}`,
-			});
+		// Tentar enviar com algumas tentativas, esperando carregamento do WhatsApp Web
+		let sent = false;
+		for (let attempt = 1; attempt <= 3 && !sent; attempt++) {
+			try {
+				await chrome.tabs.update(tab.id, {
+					url: `https://web.whatsapp.com/send?phone=${number}`,
+				});
 
-			await sleep(5000);
+				// Aguardar carregamento do chat. Pode ser que precise de mais tempo.
+				await sleep(7000);
 
-			const response = await chrome.tabs.sendMessage(tab.id, {
-				action: "send",
-				message,
-			});
+				const response = await chrome.tabs.sendMessage(tab.id, {
+					action: "send",
+					message,
+				});
 
-			if (response && response.success) {
-				successCount++;
-			} else {
-				failedCount++;
+				if (response && response.success) {
+					sent = true;
+					break;
+				} else {
+					// Se DOM não estava pronto, aguardar e tentar novamente
+					console.warn(
+						`Tentativa ${attempt} falhou para ${number}:`,
+						response && response.error,
+					);
+					await sleep(3000);
+				}
+			} catch (error) {
+				console.error(
+					`Erro na tentativa ${attempt} ao enviar para`,
+					number,
+					error,
+				);
+				await sleep(3000);
 			}
-		} catch (error) {
-			console.error("Erro ao enviar para", number, error);
+		}
+
+		if (sent) {
+			successCount++;
+		} else {
 			failedCount++;
 		}
 
