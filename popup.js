@@ -132,10 +132,22 @@ document.getElementById("start").onclick = async () => {
 		.filter(Boolean);
 	const normalizedFromRaw = rawList.map((s) => s.replace(/\D/g, ""));
 	const invalids = normalizedFromRaw.filter((n) => n.length && n.length < 12);
+	const msg1 = document.querySelector('[data-msg="1"]').value.trim();
+	const msg2 = document.querySelector('[data-msg="2"]').value.trim();
+	const msg3 = document.querySelector('[data-msg="3"]').value.trim();
 
-	const messages = [...document.querySelectorAll(".msg")]
-		.map((m) => m.value)
-		.filter(Boolean);
+	if (!msg1) {
+		alert("Mensagem 1 é obrigatória");
+		return;
+	}
+
+	if (!msg2) {
+		alert("Mensagem 2 é obrigatória");
+		return;
+	}
+
+	const messages = [msg1, msg2];
+	if (msg3) messages.push(msg3);
 
 	const minInterval = Number(document.getElementById("minInterval").value);
 	const maxInterval = Number(document.getElementById("maxInterval").value);
@@ -154,8 +166,8 @@ document.getElementById("start").onclick = async () => {
 		);
 	}
 
-	if (!messages.length) {
-		alert("Preencha pelo menos uma mensagem");
+	if (messages.length < 2) {
+		alert("Preencha pelo menos duas mensagens");
 		return;
 	}
 
