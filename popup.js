@@ -36,6 +36,31 @@ window.addEventListener("DOMContentLoaded", async () => {
 		window.close();
 		return;
 	}
+
+	hideProgress();
+	showForm();
+
+	const statsBtn = document.getElementById("statsToggle");
+	if (statsBtn) {
+		statsBtn.innerHTML =
+			'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
+		statsBtn.addEventListener("click", () => {
+			const prog = document.getElementById("progressSection");
+			const form = document.getElementById("formSection");
+			const progVisible =
+				prog && window.getComputedStyle(prog).display !== "none";
+			if (progVisible) {
+				hideProgress();
+				showForm();
+				statsBtn.innerHTML =
+					'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
+			} else {
+				showProgress();
+				hideForm();
+				statsBtn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Voltar';
+			}
+		});
+	}
 });
 
 function saveData() {
@@ -86,6 +111,16 @@ function showProgress() {
 
 function hideProgress() {
 	document.getElementById("progressSection").style.display = "none";
+}
+
+function showForm() {
+	const f = document.getElementById("formSection");
+	if (f) f.style.display = "block";
+}
+
+function hideForm() {
+	const f = document.getElementById("formSection");
+	if (f) f.style.display = "none";
 }
 
 function showCountdown() {
@@ -185,7 +220,12 @@ document.getElementById("start").onclick = async () => {
 	paused = false;
 	resetProgress();
 	totalCount = numbers.length;
+	hideForm();
 	showProgress();
+	const statsBtnDuringStart = document.getElementById("statsToggle");
+	if (statsBtnDuringStart)
+		statsBtnDuringStart.innerHTML =
+			'<i class="fa-solid fa-rotate-left"></i> Voltar';
 	updateProgress();
 
 	document.getElementById("start").disabled = true;
@@ -248,6 +288,13 @@ document.getElementById("start").onclick = async () => {
 	document.getElementById("start").disabled = false;
 	document.getElementById("pause").disabled = true;
 	document.getElementById("stop").disabled = true;
+
+	showForm();
+	hideProgress();
+	const statsBtnOnEnd = document.getElementById("statsToggle");
+	if (statsBtnOnEnd)
+		statsBtnOnEnd.innerHTML =
+			'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
 };
 
 document.getElementById("pause").onclick = () => {
@@ -267,6 +314,12 @@ document.getElementById("stop").onclick = () => {
 	document.getElementById("pause").disabled = true;
 	document.getElementById("stop").disabled = true;
 	document.getElementById("pause").textContent = "⏸️ Pausar";
+	showForm();
+	hideProgress();
+	const statsBtnOnStop = document.getElementById("statsToggle");
+	if (statsBtnOnStop)
+		statsBtnOnStop.innerHTML =
+			'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
 };
 
 function sleep(ms) {
