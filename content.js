@@ -9,17 +9,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 				document.querySelector('div[contenteditable="true"]');
 
 			if (!input) {
-				console.error("Input não encontrado");
 				sendResponse({ success: false, error: "Input não encontrado" });
 				return;
 			}
 
 			input.focus();
-
-			// Limpar campo antes de inserir
 			input.textContent = "";
 
-			// Método mais confiável para inserir texto
+			// Método para inserir texto
 			const dataTransfer = new DataTransfer();
 			dataTransfer.setData("text/plain", msg.message);
 			const event = new ClipboardEvent("paste", {
@@ -28,10 +25,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 				cancelable: true,
 			});
 			const pasteHandled = input.dispatchEvent(event);
-
-			// Aguardar um pouco para o evento ser processado
 			await sleep(100);
-
 			// Fallback para método antigo APENAS se o paste não funcionou
 			if (!input.textContent || input.textContent.trim() === "") {
 			}
@@ -49,16 +43,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 				sendBtn.click();
 				sendResponse({ success: true });
 			} else {
-				console.error("Botão de enviar não encontrado");
 				sendResponse({ success: false, error: "Botão não encontrado" });
 			}
 		} catch (error) {
-			console.error("Erro ao enviar mensagem:", error);
 			sendResponse({ success: false, error: error.message });
 		}
 	})();
 
-	return true; // Indica que a resposta será enviada de forma assíncrona
+	return true;
 });
 
 function sleep(ms) {

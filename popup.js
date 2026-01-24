@@ -4,10 +4,8 @@ let successCount = 0;
 let failedCount = 0;
 let totalCount = 0;
 
-// Carregar dados salvos ao abrir
 window.addEventListener("DOMContentLoaded", () => {
 	loadSavedData();
-	// Salvar dados ao modificar campos
 	document.getElementById("numbers").addEventListener("input", saveData);
 	document.getElementById("minInterval").addEventListener("input", saveData);
 	document.getElementById("maxInterval").addEventListener("input", saveData);
@@ -39,9 +37,7 @@ function loadSavedData() {
 			document.querySelector('[data-msg="1"]').value = data.message1 || "";
 			document.querySelector('[data-msg="2"]').value = data.message2 || "";
 			document.querySelector('[data-msg="3"]').value = data.message3 || "";
-		} catch (e) {
-			console.error("Erro ao carregar dados salvos:", e);
-		}
+		} catch (e) {}
 	}
 }
 
@@ -92,19 +88,13 @@ async function countdownTimer(seconds) {
 
 document.getElementById("start").onclick = async () => {
 	const rawNumbers = document.getElementById("numbers").value || "";
-
-	// Tentar capturar padrões como +5511999999999 ou 5511999999999
 	let extracted = rawNumbers.match(/\+?\d{8,15}/g) || [];
-
-	// Se não encontrou via regex, dividir por separadores comuns (vírgula, nova linha, ponto-e-vírgula)
 	if (!extracted.length) {
 		extracted = rawNumbers
 			.split(/[,\n\r;]+/)
 			.map((s) => s.trim())
 			.filter(Boolean);
 	}
-
-	// Normalizar para dígitos apenas e manter números plausíveis (ex: 55 + DDD + número)
 	let numbers = extracted
 		.map((n) => n.replace(/\D/g, ""))
 		.filter((n) => n.length >= 12);
@@ -112,7 +102,6 @@ document.getElementById("start").onclick = async () => {
 	// Remover duplicados
 	numbers = [...new Set(numbers)];
 
-	// Avisar sobre números inválidos (se houver)
 	const rawList = rawNumbers
 		.split(/[,\n\r;]+/)
 		.map((s) => s.trim())
@@ -163,7 +152,6 @@ document.getElementById("start").onclick = async () => {
 	showProgress();
 	updateProgress();
 
-	// Atualizar estado dos botões
 	document.getElementById("start").disabled = true;
 	document.getElementById("pause").disabled = false;
 	document.getElementById("stop").disabled = false;
@@ -187,7 +175,6 @@ document.getElementById("start").onclick = async () => {
 					url: `https://web.whatsapp.com/send?phone=${number}`,
 				});
 
-				// Aguardar carregamento do chat. Pode ser que precise de mais tempo.
 				await sleep(7000);
 
 				const response = await chrome.tabs.sendMessage(tab.id, {
@@ -199,19 +186,9 @@ document.getElementById("start").onclick = async () => {
 					sent = true;
 					break;
 				} else {
-					// Se DOM não estava pronto, aguardar e tentar novamente
-					console.warn(
-						`Tentativa ${attempt} falhou para ${number}:`,
-						response && response.error,
-					);
 					await sleep(3000);
 				}
 			} catch (error) {
-				console.error(
-					`Erro na tentativa ${attempt} ao enviar para`,
-					number,
-					error,
-				);
 				await sleep(3000);
 			}
 		}
@@ -223,8 +200,6 @@ document.getElementById("start").onclick = async () => {
 		}
 
 		updateProgress();
-
-		// Mostrar countdown apenas se não for o último número
 		if (running && numbers.indexOf(number) < numbers.length - 1) {
 			const randomDelay =
 				minInterval + Math.random() * (maxInterval - minInterval);
@@ -232,7 +207,6 @@ document.getElementById("start").onclick = async () => {
 		}
 	}
 
-	// Finalizar
 	running = false;
 	paused = false;
 	document.getElementById("start").disabled = false;
