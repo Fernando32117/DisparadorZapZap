@@ -4,7 +4,7 @@ let successCount = 0;
 let failedCount = 0;
 let totalCount = 0;
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
 	loadSavedData();
 	document.getElementById("numbers").addEventListener("input", saveData);
 	document.getElementById("minInterval").addEventListener("input", saveData);
@@ -12,6 +12,30 @@ window.addEventListener("DOMContentLoaded", () => {
 	document.querySelectorAll(".msg").forEach((textarea) => {
 		textarea.addEventListener("input", saveData);
 	});
+
+	// Se a aba ativa não for o WhatsApp Web, redireciona para https://web.whatsapp.com
+	try {
+		const [tab] = await chrome.tabs.query({
+			active: true,
+			currentWindow: true,
+		});
+		if (!tab || !tab.url || !tab.url.includes("web.whatsapp.com")) {
+			if (tab && tab.id) {
+				chrome.tabs.update(tab.id, { url: "https://web.whatsapp.com" });
+			} else {
+				chrome.tabs.create({ url: "https://web.whatsapp.com" });
+			}
+			// Fecha o popup após redirecionar
+			window.close();
+			return;
+		}
+	} catch (e) {
+		try {
+			chrome.tabs.create({ url: "https://web.whatsapp.com" });
+		} catch (e2) {}
+		window.close();
+		return;
+	}
 });
 
 function saveData() {
