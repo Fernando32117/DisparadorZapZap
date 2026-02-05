@@ -5,10 +5,12 @@ let failedCount = 0;
 let totalCount = 0;
 let countdownIntervalId = null;
 let currentNextSendAt = null;
+let numbersList = [];
 
 window.addEventListener("DOMContentLoaded", async () => {
 	loadSavedData();
-	document.getElementById("numbers").addEventListener("input", saveData);
+	setupNumbersInput();
+	setupClearNumbers();
 	document.getElementById("minInterval").addEventListener("input", saveData);
 	document.getElementById("maxInterval").addEventListener("input", saveData);
 	document.querySelectorAll(".msg").forEach((textarea) => {
@@ -89,7 +91,7 @@ function loadSavedData() {
 	if (saved) {
 		try {
 			const data = JSON.parse(saved);
-			document.getElementById("numbers").value = data.numbers || "";
+			setNumbersFromText(data.numbers || "");
 			document.getElementById("minInterval").value = data.minInterval || 6;
 			document.getElementById("maxInterval").value = data.maxInterval || 12;
 			document.querySelector('[data-msg="1"]').value = data.message1 || "";
@@ -97,6 +99,150 @@ function loadSavedData() {
 			document.querySelector('[data-msg="3"]').value = data.message3 || "";
 		} catch (e) {}
 	}
+}
+
+function setupNumbersInput() {
+	const input = document.getElementById("numbersInput");
+	if (!input) return;
+
+	input.addEventListener("keydown", (event) => {
+		if (
+			event.key === "Enter" ||
+			event.key === "," ||
+			event.key === ";" ||
+			event.key === " "
+		) {
+			event.preventDefault();
+			commitPendingNumber();
+		} else if (event.key === "Backspace" && !input.value) {
+			removeLastNumber();
+		}
+	});
+
+	input.addEventListener("blur", () => {
+		commitPendingNumber();
+	});
+
+	input.addEventListener("paste", (event) => {
+		const text = (event.clipboardData || window.clipboardData).getData("text");
+		if (text) {
+			event.preventDefault();
+			addNumbersFromText(text);
+		}
+	});
+}
+
+function setupClearNumbers() {
+	const btn = document.getElementById("clearNumbers");
+	if (!btn) return;
+	btn.addEventListener("click", () => {
+		numbersList = [];
+		renderNumberChips();
+		updateNumbersValue();
+		saveData();
+	});
+	updateClearButtonState();
+}
+
+function commitPendingNumber() {
+	const input = document.getElementById("numbersInput");
+	if (!input) return;
+	if (input.value && input.value.trim()) {
+		addNumbersFromText(input.value);
+		input.value = "";
+	}
+}
+
+function setNumbersFromText(text) {
+	numbersList = [];
+	addNumbersFromText(text, true);
+}
+
+function addNumbersFromText(text, replaceList = false) {
+	const raw = text || "";
+	let extracted = raw.match(/\+?\d{8,15}/g) || [];
+	if (!extracted.length) {
+		extracted = raw
+			.split(/[,\n\r; ]+/)
+			.map((s) => s.trim())
+			.filter(Boolean);
+	}
+
+	const toAdd = extracted
+		.map((n) => n.replace(/\D/g, ""))
+		.filter((n) => n.length >= 12);
+
+	if (replaceList) {
+		numbersList = [];
+	}
+
+	let changed = false;
+	for (const number of toAdd) {
+		if (!numbersList.includes(number)) {
+			numbersList.push(number);
+			changed = true;
+		}
+	}
+
+	renderNumberChips();
+	updateNumbersValue();
+
+	if (changed) {
+		saveData();
+	}
+}
+
+function removeNumber(number) {
+	const next = numbersList.filter((n) => n !== number);
+	if (next.length !== numbersList.length) {
+		numbersList = next;
+		renderNumberChips();
+		updateNumbersValue();
+		saveData();
+	}
+}
+
+function removeLastNumber() {
+	if (!numbersList.length) return;
+	numbersList.pop();
+	renderNumberChips();
+	updateNumbersValue();
+	saveData();
+}
+
+function renderNumberChips() {
+	const container = document.getElementById("numbersChips");
+	if (!container) return;
+	container.innerHTML = "";
+
+	for (const number of numbersList) {
+		const chip = document.createElement("span");
+		chip.className = "chip";
+		chip.textContent = number;
+
+		const removeBtn = document.createElement("button");
+		removeBtn.type = "button";
+		removeBtn.setAttribute("aria-label", `Remover ${number}`);
+		removeBtn.textContent = "x";
+		removeBtn.addEventListener("click", () => removeNumber(number));
+
+		chip.appendChild(removeBtn);
+		container.appendChild(chip);
+	}
+
+	updateClearButtonState();
+}
+
+function updateNumbersValue() {
+	const textarea = document.getElementById("numbers");
+	if (!textarea) return;
+	textarea.value = numbersList.join("\n");
+}
+
+function updateClearButtonState() {
+	const btn = document.getElementById("clearNumbers");
+	if (!btn) return;
+	btn.disabled = numbersList.length === 0;
 }
 
 function updateProgress() {
@@ -225,6 +371,7 @@ function updateCountdownDisplay() {
 }
 
 document.getElementById("start").onclick = async () => {
+	commitPendingNumber();
 	const rawNumbers = document.getElementById("numbers").value || "";
 	let extracted = rawNumbers.match(/\+?\d{8,15}/g) || [];
 	if (!extracted.length) {

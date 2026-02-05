@@ -20,8 +20,21 @@
 		<main>
 			<div id="formSection">
 			<section class="interval-section">
-				<label><i class="fa-solid fa-phone"></i> Números (Brasil)</label>
-				<textarea id="numbers" placeholder="Ex: 5511999999999"></textarea>
+				<div class="numbers-header">
+					<label><i class="fa-solid fa-phone"></i> Números (Brasil)</label>
+					<button id="clearNumbers" type="button" class="btn-clear">
+						Limpar todos
+					</button>
+				</div>
+				<div class="numbers-input">
+					<div id="numbersChips" class="chips"></div>
+					<input
+						id="numbersInput"
+						type="text"
+						placeholder="Ex: 5511987654321"
+					/>
+				</div>
+				<textarea id="numbers" class="numbers-hidden"></textarea>
 				<small>Formato: 55+DDD+Número (sem espaços).</small>
 			</section>
 
