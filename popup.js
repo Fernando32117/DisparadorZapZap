@@ -3,6 +3,8 @@ let paused = false;
 let successCount = 0;
 let failedCount = 0;
 let totalCount = 0;
+let countdownIntervalId = null;
+let currentNextSendAt = null;
 
 window.addEventListener("DOMContentLoaded", async () => {
 	loadSavedData();
@@ -60,6 +62,14 @@ window.addEventListener("DOMContentLoaded", async () => {
 			}
 		});
 	}
+
+	chrome.runtime.onMessage.addListener((msg) => {
+		if (msg.action === "progress") {
+			applyState(msg.state);
+		}
+	});
+
+	requestState();
 });
 
 function saveData() {
@@ -104,6 +114,54 @@ function resetProgress() {
 	updateProgress();
 }
 
+function applyState(state) {
+	if (!state) return;
+
+	const wasRunning = running;
+
+	running = !!state.running;
+	paused = !!state.paused;
+	successCount = state.successCount || 0;
+	failedCount = state.failedCount || 0;
+	totalCount = state.totalCount || 0;
+
+	updateProgress();
+
+	if (running !== wasRunning) {
+		const statsBtn = document.getElementById("statsToggle");
+		if (running) {
+			hideForm();
+			showProgress();
+			if (statsBtn)
+				statsBtn.innerHTML =
+					'<i class="fa-solid fa-rotate-left"></i> Voltar';
+		} else {
+			showForm();
+			hideProgress();
+			if (statsBtn)
+				statsBtn.innerHTML =
+					'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
+		}
+	}
+
+	document.getElementById("start").disabled = running;
+	document.getElementById("pause").disabled = !running;
+	document.getElementById("stop").disabled = !running;
+
+	const pauseBtn = document.getElementById("pause");
+	pauseBtn.textContent = paused ? "▶️ Continuar" : "⏸️ Pausar";
+
+	syncCountdown(state.nextSendAt);
+}
+
+function requestState() {
+	chrome.runtime.sendMessage({ action: "getState" }, (res) => {
+		if (res && res.state) {
+			applyState(res.state);
+		}
+	});
+}
+
 function showProgress() {
 	document.getElementById("progressSection").style.display = "block";
 }
@@ -130,18 +188,40 @@ function hideCountdown() {
 	document.getElementById("countdownTimer").style.display = "none";
 }
 
-async function countdownTimer(seconds) {
-	showCountdown();
-	const countdownEl = document.getElementById("countdown");
-	let remaining = Math.ceil(seconds);
-
-	while (remaining > 0 && running && !paused) {
-		countdownEl.textContent = remaining;
-		await sleep(1000);
-		remaining--;
+function syncCountdown(nextSendAt) {
+	if (running && !paused && nextSendAt) {
+		if (currentNextSendAt !== nextSendAt || !countdownIntervalId) {
+			startCountdown(nextSendAt);
+		} else {
+			updateCountdownDisplay();
+		}
+	} else {
+		stopCountdown();
 	}
+}
 
+function startCountdown(nextSendAt) {
+	currentNextSendAt = nextSendAt;
+	showCountdown();
+	updateCountdownDisplay();
+	if (countdownIntervalId) clearInterval(countdownIntervalId);
+	countdownIntervalId = setInterval(updateCountdownDisplay, 1000);
+}
+
+function stopCountdown() {
+	currentNextSendAt = null;
+	if (countdownIntervalId) {
+		clearInterval(countdownIntervalId);
+		countdownIntervalId = null;
+	}
 	hideCountdown();
+}
+
+function updateCountdownDisplay() {
+	if (!currentNextSendAt) return;
+	const remainingMs = currentNextSendAt - Date.now();
+	const remaining = Math.max(0, Math.ceil(remainingMs / 1000));
+	document.getElementById("countdown").textContent = remaining;
 }
 
 document.getElementById("start").onclick = async () => {
@@ -215,129 +295,29 @@ document.getElementById("start").onclick = async () => {
 		return;
 	}
 
-	running = true;
-	paused = false;
-	resetProgress();
-	totalCount = numbers.length;
-	hideForm();
-	showProgress();
-	const statsBtnDuringStart = document.getElementById("statsToggle");
-	if (statsBtnDuringStart)
-		statsBtnDuringStart.innerHTML =
-			'<i class="fa-solid fa-rotate-left"></i> Voltar';
-	updateProgress();
-
-	document.getElementById("start").disabled = true;
-	document.getElementById("pause").disabled = false;
-	document.getElementById("stop").disabled = false;
-
 	const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-	for (const number of numbers) {
-		if (!running) break;
-
-		while (paused) {
-			await sleep(500);
-		}
-
-		const message = messages[Math.floor(Math.random() * messages.length)];
-
-		// Tentar enviar com algumas tentativas, esperando carregamento do WhatsApp Web
-		let sent = false;
-		for (let attempt = 1; attempt <= 2 && !sent; attempt++) {
-			try {
-				if (attempt === 1) {
-					try {
-						const openResponse = await chrome.tabs.sendMessage(tab.id, {
-							action: "openChat",
-							phone: number,
-						});
-
-						if (openResponse && openResponse.success) {
-							await sleep(4000);
-						} else {
-							throw new Error("Navegação interna falhou");
-						}
-					} catch (e) {
-						await chrome.tabs.update(tab.id, {
-							url: `https://web.whatsapp.com/send?phone=${number}`,
-						});
-						await sleep(6000);
-					}
-				} else {
-					await chrome.tabs.update(tab.id, {
-						url: `https://web.whatsapp.com/send?phone=${number}`,
-					});
-					await sleep(6000);
-				}
-
-				const response = await chrome.tabs.sendMessage(tab.id, {
-					action: "send",
-					message,
-				});
-
-				if (response && response.success) {
-					sent = true;
-					break;
-				} else {
-					await sleep(2000);
-				}
-			} catch (error) {
-				await sleep(2000);
-			}
-		}
-
-		if (sent) {
-			successCount++;
-		} else {
-			failedCount++;
-		}
-
-		updateProgress();
-		if (running && numbers.indexOf(number) < numbers.length - 1) {
-			const randomDelay =
-				minInterval + Math.random() * (maxInterval - minInterval);
-			await countdownTimer(randomDelay);
-		}
+	if (!tab || !tab.id) {
+		alert("Aba ativa nao encontrada");
+		return;
 	}
 
-	running = false;
-	paused = false;
-	document.getElementById("start").disabled = false;
-	document.getElementById("pause").disabled = true;
-	document.getElementById("stop").disabled = true;
+	await chrome.runtime.sendMessage({
+		action: "start",
+		tabId: tab.id,
+		payload: { numbers, messages, minInterval, maxInterval },
+	});
 
-	showForm();
-	hideProgress();
-	const statsBtnOnEnd = document.getElementById("statsToggle");
-	if (statsBtnOnEnd)
-		statsBtnOnEnd.innerHTML =
-			'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
+	requestState();
 };
 
-document.getElementById("pause").onclick = () => {
-	paused = !paused;
-	const btn = document.getElementById("pause");
-	if (paused) {
-		btn.textContent = "▶️ Continuar";
-	} else {
-		btn.textContent = "⏸️ Pausar";
-	}
+document.getElementById("pause").onclick = async () => {
+	await chrome.runtime.sendMessage({ action: "togglePause" });
+	requestState();
 };
 
-document.getElementById("stop").onclick = () => {
-	running = false;
-	paused = false;
-	document.getElementById("start").disabled = false;
-	document.getElementById("pause").disabled = true;
-	document.getElementById("stop").disabled = true;
-	document.getElementById("pause").textContent = "⏸️ Pausar";
-	showForm();
-	hideProgress();
-	const statsBtnOnStop = document.getElementById("statsToggle");
-	if (statsBtnOnStop)
-		statsBtnOnStop.innerHTML =
-			'<i class="fa-solid fa-chart-bar"></i> Progresso do Disparo';
+document.getElementById("stop").onclick = async () => {
+	await chrome.runtime.sendMessage({ action: "stop" });
+	requestState();
 };
 
 function sleep(ms) {

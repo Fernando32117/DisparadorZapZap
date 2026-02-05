@@ -2,8 +2,11 @@
 	"manifest_version": 3,
 	"name": "Disparador ZapZap(Dev)",
 	"version": "0.1.0",
-	"permissions": ["tabs"],
+	"permissions": ["tabs", "storage"],
 	"host_permissions": ["https://web.whatsapp.com/*"],
+	"background": {
+		"service_worker": "background.js"
+	},
 	"action": {
 		"default_popup": "popup.html",
 		"default_icon": "assets/raio.png"
