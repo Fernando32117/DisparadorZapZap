@@ -1,93 +1,108 @@
 # Disparador ZapZap (Dev)
 
-Extensão Chrome simples para envio automatizado de mensagens via WhatsApp Web. Permite enviar uma mensagem (com até 3 variações) para vários números, com intervalos aleatórios configuráveis para parecer mais natural.
+Extensão Chrome (Manifest V3) para automatizar o envio de mensagens no WhatsApp Web com intervalos aleatórios, painel de progresso e controle de pausa. Focada em UX e fluxo confiável: o disparo continua mesmo com o popup fechado.
 
-**Aviso:** Use com responsabilidade. O envio massivo de mensagens pode levar ao bloqueio de contas.
+**Aviso importante**  
+Use com responsabilidade e com consentimento explícito dos destinatários. O uso inadequado pode violar os termos do WhatsApp e gerar bloqueios.
+
+**Resumo rápido**
+- Envio para múltiplos números com mensagens variadas.
+- Intervalo aleatório configurável.
+- Pausar, continuar e parar a qualquer momento.
+- Progresso persistente com service worker.
+- Chips visuais para melhor gerenciamento dos números.
 
 ---
 
 **Funcionalidades**
-- Envio de mensagens para múltiplos números (formato Brasil: `55 + DDD + número`).
-- Até 3 variações de mensagem (mínimo 1 obrigatório).
-- Intervalo aleatório entre envios (configurável, mínimo 6s).
-- Pausar/Continuar e Parar processo de disparo.
-- Barra de progresso com contadores de sucesso/falha.
+- Envio automatizado no WhatsApp Web.
+- Até 3 variações de mensagem (mínimo 2 obrigatórias).
+- Intervalo aleatório entre mensagens (mínimo 6s).
+- Controle de execução: iniciar, pausar, continuar, parar.
+- Progresso em tempo real (sucesso, falha, total).
+- Countdown para próxima mensagem.
+- Lista de números em chips com remoção individual e botão “Limpar todos”.
+- Persistência do estado mesmo com o popup fechado.
+
+---
+
+**Tecnologias e arquitetura**
+- **Manifest V3** com `service_worker` para manter o disparo ativo.
+- **Content Script** para interação direta com o DOM do WhatsApp Web.
+- **Popup UI** para configurar, iniciar e acompanhar o envio.
+- **chrome.storage** para persistência do estado.
+
+**Arquivos principais**
+- `manifest.json`: configurações da extensão e permissões.
+- `background.js`: motor do disparo (service worker).
+- `content.js`: interação com o WhatsApp Web.
+- `popup.html`: interface do usuário.
+- `popup.js`: lógica da UI.
+- `styles.css`: estilos visuais.
 
 ---
 
 **Pré-requisitos**
-- Google Chrome (ou navegador compatível com extensões Chromium).
-- Conta WhatsApp ativa e sessão iniciada em WhatsApp Web.
+- Google Chrome (ou navegador Chromium compatível).
+- Sessão ativa no WhatsApp Web.
 
 ---
 
 **Instalação (modo desenvolvedor)**
-1. Abra o Chrome e vá para `chrome://extensions/`.
-2. Ative o *Modo do desenvolvedor* (canto superior direito).
-3. Clique em "Carregar sem compactação" (Load unpacked) e selecione a pasta do projeto.
-4. A extensão será adicionada; abra o ícone da extensão para usar.
+1. Abra `chrome://extensions/`.
+2. Ative o **Modo do desenvolvedor**.
+3. Clique em **Carregar sem compactação**.
+4. Selecione a pasta do projeto.
 
 ---
 
 **Como usar**
-1. Abra WhatsApp Web e verifique que sua sessão está ativa.
-2. Clique no ícone da extensão e preencha os campos:
-   - `Números`: cada número em uma nova linha, no formato `55DDDNNNNNNNN` (sem espaços).
-   - `Mensagem 1`: obrigatória.
-   - `Mensagem 2` e `Mensagem 3`: opcionais (serão escolhidas aleatoriamente).
-   - `Mínimo` e `Máximo`: intervalo em segundos (mínimo 6s).
-3. Clique em `🚀 Disparar`. A extensão abrirá cada chat no WhatsApp Web e enviará a mensagem.
-4. Use `⏸️ Pausar` para interromper temporariamente ou `🛑 Parar` para encerrar completamente.
-5. Acompanhe progresso, sucessos e falhas pelo painel.
+1. Abra o WhatsApp Web e confirme que está logado.
+2. Abra o popup da extensão.
+3. Adicione os números no campo de chips.
+4. Informe as mensagens e intervalos.
+5. Clique em **Disparar**.
+6. Acompanhe o progresso e o countdown.
 
 ---
 
 **Formato dos números**
-- Exemplo (Brasil): `5511999999999` (55 + DDD + número).
-- A extensão filtra caracteres não numéricos automaticamente.
+- Formato Brasil: `55 + DDD + número`.
+- Exemplo: `5511999999999`.
+- Caracteres não numéricos são ignorados automaticamente.
 
 ---
 
-**Mensagens e comportamento**
-- Pelo menos 1 mensagem é obrigatória.
-- As mensagens são selecionadas aleatoriamente entre as variações fornecidas.
-- Há um delay mínimo recomendado de 6 segundos entre envios para reduzir risco de bloqueio.
+**Boas práticas**
+- Evite listas muito grandes em pouco tempo.
+- Use mensagens com variações reais para reduzir bloqueios.
+- Respeite consentimento e LGPD.
 
 ---
 
-**Erros comuns & soluções**
-- `Input não encontrado` ou `Botão não encontrado`:
-  - Certifique-se de que o WhatsApp Web esteja totalmente carregado e que o chat do número esteja acessível.
-  - Atualize a página do WhatsApp Web e tente novamente.
-- Verifique se o seletor do campo de mensagem mudou (interfaces do WhatsApp podem atualizar). O arquivo relevante é [content.js](content.js).
+**Limitações conhecidas**
+- O WhatsApp Web muda a interface com frequência. Se o envio parar, pode ser necessário atualizar seletores em `content.js`.
+- O envio depende da estabilidade da conexão e do carregamento correto do WhatsApp Web.
 
 ---
 
-**Arquivos principais**
-- [manifest.json](manifest.json): configuração da extensão (manifest v3, permissões e host_permissions).
-- [content.js](content.js): script injetado no WhatsApp Web que encontra o campo de entrada, insere a mensagem e aciona o envio.
-- [popup.html](popup.html): interface da extensão.
-- [popup.js](popup.js): lógica da UI e fluxo de envio (controle de intervalos, progressos, start/pause/stop).
-- [styles.css](styles.css): estilos da UI.
-
----
-
-**Desenvolvimento**
-- Para ajustar seletores ou comportamento no WhatsApp Web, edite `content.js`.
-- Utilize `console` do devtools para debugar mensagens/erros do script injetado.
-
----
-
-**Considerações legais e éticas**
-- Não use esta ferramenta para spam, assédio ou qualquer atividade que viole os termos do WhatsApp ou legislações locais.
-- Respeite o consentimento dos destinatários.
+**Possíveis melhorias (roadmap)**
+- Exportar/Importar listas de números.
+- Templates de mensagens com variáveis.
+- Logs de execução detalhados.
 
 ---
 
 **Contribuições**
-- Sugestões e melhorias são bem-vindas. Abra uma issue descrevendo alteração proposta.
+Sugestões são bem-vindas. Abra uma issue com o contexto e a proposta de melhoria.
+
+---
+
+**Autor**
+Fernando Souza  
+Portfólio e redes sociais no próprio popup.
 
 ---
 
 **Licença**
-MIT License. Veja o arquivo LICENSE se desejar adicionar informações formais.
+MIT
