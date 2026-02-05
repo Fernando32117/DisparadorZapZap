@@ -16,7 +16,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			input.focus();
 			input.textContent = "";
 
-			// Método para inserir texto
 			const dataTransfer = new DataTransfer();
 			dataTransfer.setData("text/plain", msg.message);
 			const event = new ClipboardEvent("paste", {
@@ -37,9 +36,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			const sendBtn =
 				document.querySelector('button[data-tab="11"]') ||
 				document.querySelector('[data-testid="compose-btn-send"]') ||
-				document.querySelector('span[data-icon="send"]')?.parentElement;
+				document.querySelector('button[aria-label*="Enviar"]') ||
+				document
+					.querySelector('button span[data-icon="send"]')
+					?.closest("button");
 
-			if (sendBtn) {
+			if (
+				sendBtn &&
+				!sendBtn.querySelector('[data-icon="ptt"]') &&
+				!sendBtn.querySelector('[data-icon="mic"]')
+			) {
 				sendBtn.click();
 				sendResponse({ success: true });
 			} else {
@@ -56,3 +62,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 function sleep(ms) {
 	return new Promise((res) => setTimeout(res, ms));
 }
+
+// Abrir chat sem reload
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+	if (msg.action === "openChat") {
+		(async () => {
+			try {
+				const link = document.createElement("a");
+				link.href = `https://web.whatsapp.com/send?phone=${msg.phone}`;
+				link.style.display = "none";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+
+				sendResponse({ success: true });
+			} catch (error) {
+				sendResponse({ success: false, error: error.message });
+			}
+		})();
+		return true;
+	}
+});

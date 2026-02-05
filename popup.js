@@ -1,4 +1,4 @@
-let running = false;
+﻿let running = false;
 let paused = false;
 let successCount = 0;
 let failedCount = 0;
@@ -25,7 +25,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 			} else {
 				chrome.tabs.create({ url: "https://web.whatsapp.com" });
 			}
-			// Fecha o popup após redirecionar
 			window.close();
 			return;
 		}
@@ -245,13 +244,32 @@ document.getElementById("start").onclick = async () => {
 
 		// Tentar enviar com algumas tentativas, esperando carregamento do WhatsApp Web
 		let sent = false;
-		for (let attempt = 1; attempt <= 3 && !sent; attempt++) {
+		for (let attempt = 1; attempt <= 2 && !sent; attempt++) {
 			try {
-				await chrome.tabs.update(tab.id, {
-					url: `https://web.whatsapp.com/send?phone=${number}`,
-				});
+				if (attempt === 1) {
+					try {
+						const openResponse = await chrome.tabs.sendMessage(tab.id, {
+							action: "openChat",
+							phone: number,
+						});
 
-				await sleep(7000);
+						if (openResponse && openResponse.success) {
+							await sleep(4000);
+						} else {
+							throw new Error("Navegação interna falhou");
+						}
+					} catch (e) {
+						await chrome.tabs.update(tab.id, {
+							url: `https://web.whatsapp.com/send?phone=${number}`,
+						});
+						await sleep(6000);
+					}
+				} else {
+					await chrome.tabs.update(tab.id, {
+						url: `https://web.whatsapp.com/send?phone=${number}`,
+					});
+					await sleep(6000);
+				}
 
 				const response = await chrome.tabs.sendMessage(tab.id, {
 					action: "send",
@@ -262,10 +280,10 @@ document.getElementById("start").onclick = async () => {
 					sent = true;
 					break;
 				} else {
-					await sleep(3000);
+					await sleep(2000);
 				}
 			} catch (error) {
-				await sleep(3000);
+				await sleep(2000);
 			}
 		}
 
