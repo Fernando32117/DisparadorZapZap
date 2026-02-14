@@ -5,7 +5,7 @@
 	"permissions": ["tabs", "storage", "alarms"],
 	"host_permissions": ["https://web.whatsapp.com/*"],
 	"background": {
-		"service_worker": "background.js"
+		"service_worker": "src/background/index.js"
 	},
 	"action": {
 		"default_popup": "popup.html",
@@ -14,7 +14,14 @@
 	"content_scripts": [
 		{
 			"matches": ["https://web.whatsapp.com/*"],
-			"js": ["content.js"]
+			"js": [
+				"src/shared/constantes.js",
+				"src/shared/tempo.js",
+				"src/content/seletores-whatsapp.js",
+				"src/content/validacao-chat.js",
+				"src/content/envio-mensagem.js",
+				"src/content/index.js"
+			]
 		}
 	]
 }
