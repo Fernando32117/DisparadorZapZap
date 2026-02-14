@@ -73,7 +73,10 @@ async function ensureStateLoaded() {
 		stateLoaded = true;
 
 		if (state.running && !state.paused) {
-			const remaining = Math.max(0, (state.nextSendAt || Date.now()) - Date.now());
+			const remaining = Math.max(
+				0,
+				(state.nextSendAt || Date.now()) - Date.now(),
+			);
 			await scheduleFromExistingState(remaining);
 		}
 	})();
@@ -93,7 +96,8 @@ function sanitizeLoadedState(saved) {
 	if (typeof merged.index !== "number") merged.index = 0;
 	if (typeof merged.successCount !== "number") merged.successCount = 0;
 	if (typeof merged.failedCount !== "number") merged.failedCount = 0;
-	if (typeof merged.totalCount !== "number") merged.totalCount = merged.numbers.length;
+	if (typeof merged.totalCount !== "number")
+		merged.totalCount = merged.numbers.length;
 	if (typeof merged.lastMessageIndex !== "number") merged.lastMessageIndex = -1;
 
 	return merged;
@@ -200,7 +204,8 @@ async function processNextNumber() {
 
 		await persistAndBroadcast();
 		const delaySeconds =
-			state.minInterval + Math.random() * (state.maxInterval - state.minInterval);
+			state.minInterval +
+			Math.random() * (state.maxInterval - state.minInterval);
 		await scheduleNextDispatch(Math.ceil(delaySeconds * 1000));
 	} finally {
 		processing = false;

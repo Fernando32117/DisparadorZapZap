@@ -9,13 +9,16 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			// Verifica se há mensagem de erro do WhatsApp (número inválido)
 			const errorSelectors = [
 				'div[data-id="invalid-phone-alert"]',
-				'span[data-icon="alert-phone"]'
+				'span[data-icon="alert-phone"]',
 			];
-			
+
 			for (const selector of errorSelectors) {
 				const errorElement = document.querySelector(selector);
 				if (errorElement && errorElement.offsetParent !== null) {
-					sendResponse({ success: false, error: "Número inválido ou não existe" });
+					sendResponse({
+						success: false,
+						error: "Número inválido ou não existe",
+					});
 					return;
 				}
 			}
