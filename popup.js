@@ -6,9 +6,10 @@ let totalCount = 0;
 let countdownIntervalId = null;
 let currentNextSendAt = null;
 let numbersList = [];
+const POPUP_DATA_KEY = "zapzapData";
 
 window.addEventListener("DOMContentLoaded", async () => {
-	loadSavedData();
+	await loadSavedData();
 	setupNumbersInput();
 	setupClearNumbers();
 	document.getElementById("minInterval").addEventListener("input", saveData);
@@ -74,7 +75,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 	requestState();
 });
 
-function saveData() {
+async function saveData() {
 	const data = {
 		numbers: document.getElementById("numbers").value,
 		minInterval: document.getElementById("minInterval").value,
@@ -83,21 +84,41 @@ function saveData() {
 		message2: document.querySelector('[data-msg="2"]').value,
 		message3: document.querySelector('[data-msg="3"]').value,
 	};
-	localStorage.setItem("zapzapData", JSON.stringify(data));
+	try {
+		await chrome.storage.local.set({ [POPUP_DATA_KEY]: data });
+	} catch (e) {
+		try {
+			localStorage.setItem(POPUP_DATA_KEY, JSON.stringify(data));
+		} catch (e2) {}
+	}
 }
 
-function loadSavedData() {
-	const saved = localStorage.getItem("zapzapData");
-	if (saved) {
+async function loadSavedData() {
+	let data = null;
+
+	try {
+		const stored = await chrome.storage.local.get(POPUP_DATA_KEY);
+		data = stored[POPUP_DATA_KEY] || null;
+	} catch (e) {}
+
+	// Migra dados antigos do localStorage para storage da extensão.
+	if (!data) {
 		try {
-			const data = JSON.parse(saved);
-			setNumbersFromText(data.numbers || "");
-			document.getElementById("minInterval").value = data.minInterval || 6;
-			document.getElementById("maxInterval").value = data.maxInterval || 12;
-			document.querySelector('[data-msg="1"]').value = data.message1 || "";
-			document.querySelector('[data-msg="2"]').value = data.message2 || "";
-			document.querySelector('[data-msg="3"]').value = data.message3 || "";
+			const legacy = localStorage.getItem(POPUP_DATA_KEY);
+			if (legacy) {
+				data = JSON.parse(legacy);
+				await chrome.storage.local.set({ [POPUP_DATA_KEY]: data });
+			}
 		} catch (e) {}
+	}
+
+	if (data && typeof data === "object") {
+		setNumbersFromText(data.numbers || "");
+		document.getElementById("minInterval").value = data.minInterval || 6;
+		document.getElementById("maxInterval").value = data.maxInterval || 12;
+		document.querySelector('[data-msg="1"]').value = data.message1 || "";
+		document.querySelector('[data-msg="2"]').value = data.message2 || "";
+		document.querySelector('[data-msg="3"]').value = data.message3 || "";
 	}
 }
 
@@ -351,7 +372,7 @@ function startCountdown(nextSendAt) {
 	showCountdown();
 	updateCountdownDisplay();
 	if (countdownIntervalId) clearInterval(countdownIntervalId);
-	countdownIntervalId = setInterval(updateCountdownDisplay, 1000);
+	countdownIntervalId = setInterval(updateCountdownDisplay, 250);
 }
 
 function stopCountdown() {
@@ -366,7 +387,7 @@ function stopCountdown() {
 function updateCountdownDisplay() {
 	if (!currentNextSendAt) return;
 	const remainingMs = currentNextSendAt - Date.now();
-	const remaining = Math.max(0, Math.ceil(remainingMs / 1000));
+	const remaining = Math.max(0, Math.floor(remainingMs / 1000));
 	document.getElementById("countdown").textContent = remaining;
 }
 
@@ -432,8 +453,13 @@ document.getElementById("start").onclick = async () => {
 		return;
 	}
 
-	if (minInterval < 6) {
-		alert("Intervalo mínimo deve ser 6 segundos");
+	if (!Number.isFinite(minInterval) || minInterval < 0) {
+		alert("Intervalo mínimo deve ser um número maior ou igual a 0");
+		return;
+	}
+
+	if (!Number.isFinite(maxInterval) || maxInterval < 0) {
+		alert("Intervalo máximo deve ser um número maior ou igual a 0");
 		return;
 	}
 

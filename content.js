@@ -3,6 +3,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 	(async () => {
 		try {
+			// Aguarda um pouco para garantir que a página carregou
+			await sleep(500);
+
+			// Verifica se há mensagem de erro do WhatsApp (número inválido)
+			const errorSelectors = [
+				'div[data-id="invalid-phone-alert"]',
+				'span[data-icon="alert-phone"]'
+			];
+			
+			for (const selector of errorSelectors) {
+				const errorElement = document.querySelector(selector);
+				if (errorElement && errorElement.offsetParent !== null) {
+					sendResponse({ success: false, error: "Número inválido ou não existe" });
+					return;
+				}
+			}
+
 			const input =
 				document.querySelector('div[contenteditable="true"][data-tab="10"]') ||
 				document.querySelector('div[contenteditable="true"]._ak1l') ||
