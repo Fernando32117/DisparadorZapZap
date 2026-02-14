@@ -1,0 +1,94 @@
+.buttons {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 16px;
+}
+
+button {
+	flex: 1;
+	padding: 12px 8px;
+	cursor: pointer;
+	border: none;
+	border-radius: 8px;
+	font-weight: 600;
+	font-size: 14px;
+	transition: all 0.3s;
+	box-shadow: 0 4px 6px var(--shadow-soft);
+}
+
+.btn-clear {
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: rgba(239, 68, 68, 0.2);
+	color: var(--white);
+	border: 1px solid rgba(239, 68, 68, 0.4);
+	font-size: 12px;
+	cursor: pointer;
+	box-shadow: none;
+}
+
+.btn-clear:hover {
+	background: rgba(239, 68, 68, 0.35);
+}
+
+.btn-clear:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+#start {
+	background: var(--success);
+	color: white;
+}
+
+#start:hover {
+	background: var(--success-hover);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+#pause {
+	background: var(--warning);
+	color: white;
+}
+
+#pause:hover {
+	background: var(--warning-hover);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+#stop {
+	background: var(--danger);
+	color: white;
+}
+
+#stop:hover {
+	background: var(--danger-hover);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+#statsToggle {
+	width: 100%;
+	padding: 12px 8px;
+	cursor: pointer;
+	background: var(--primary-dark);
+	color: white;
+}
+
+#statsToggle:hover {
+	background: var(--primary-light);
+	transform: translateY(-2px);
+	box-shadow: 0 6px 12px var(--shadow-medium);
+}
+
+button:active {
+	transform: translateY(0);
+}
+
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	transform: none !important;
+}

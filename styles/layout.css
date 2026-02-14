@@ -1,0 +1,59 @@
+header {
+	background: var(--primary-light);
+	padding: 16px;
+	text-align: center;
+	border-bottom: 2px solid var(--glass-medium);
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+	backdrop-filter: blur(10px);
+}
+
+header h1 {
+	margin: 0;
+	font-size: 24px;
+	text-shadow: 2px 2px 4px var(--shadow-medium);
+	color: var(--primary-dark);
+}
+
+main {
+	padding: 16px;
+	max-height: 500px;
+	overflow-y: auto;
+}
+
+main::-webkit-scrollbar {
+	width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+	background: var(--glass-thin);
+	border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb {
+	background: var(--glass-heavy);
+	border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.5);
+}
+
+.interval-section {
+	background: var(--glass-thin);
+	padding: 12px;
+	border-radius: 8px;
+	backdrop-filter: blur(10px);
+}
+
+.interval-group {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.interval-group label {
+	margin: 0 0 6px 0;
+	font-size: 14px;
+}

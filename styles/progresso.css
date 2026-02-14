@@ -1,0 +1,95 @@
+.progress-section {
+	background: var(--glass-thin);
+	padding: 12px;
+	border-radius: 8px;
+	backdrop-filter: blur(10px);
+	animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.progress-bar {
+	background: rgba(0, 0, 0, 0.3);
+	height: 24px;
+	border-radius: 12px;
+	overflow: hidden;
+	margin: 10px 0;
+}
+
+.progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, var(--success), var(--success-hover));
+	width: 0%;
+	transition: width 0.5s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--white);
+	font-size: 11px;
+	font-weight: bold;
+}
+
+.countdown-timer {
+	background: rgba(59, 130, 246, 0.2);
+	padding: 10px;
+	border-radius: 6px;
+	text-align: center;
+	margin: 12px 0;
+	font-size: 14px;
+	border: 2px solid rgba(59, 130, 246, 0.4);
+}
+
+.countdown-timer strong {
+	font-size: 20px;
+	color: var(--accent-blue-light);
+	text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+}
+
+.progress-stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.stat {
+	background: var(--glass-thin);
+	padding: 8px;
+	border-radius: 6px;
+	text-align: center;
+	border-left: 3px solid;
+}
+
+.stat.success {
+	border-color: var(--success);
+}
+
+.stat.failed {
+	border-color: var(--danger);
+}
+
+.stat.total {
+	border-color: var(--accent-blue);
+}
+
+.stat-label {
+	display: block;
+	font-size: 14px;
+	margin-bottom: 4px;
+	opacity: 0.9;
+}
+
+.stat-value {
+	display: block;
+	font-size: 18px;
+	font-weight: bold;
+}

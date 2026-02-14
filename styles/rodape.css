@@ -1,0 +1,38 @@
+.warning {
+	background: rgba(239, 68, 68, 0.2);
+	border: 2px solid rgba(239, 68, 68, 0.4);
+	padding: 12px;
+	border-radius: 8px;
+	font-size: 14px;
+	margin: 16px 0;
+	line-height: 1.5;
+	backdrop-filter: blur(10px);
+}
+
+.developer-section {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.developer-info {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.95);
+}
+
+.dev-link {
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+	color: inherit;
+	font-weight: 700;
+}
+
+.version-info {
+	font-size: 13px;
+	opacity: 0.9;
+}
